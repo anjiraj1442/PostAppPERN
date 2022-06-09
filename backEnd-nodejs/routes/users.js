@@ -3,7 +3,7 @@ const app = express();
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
 const DB = require('../DB/connection')
-const nodemailer = require('../middleware/nodemailer');
+const Nodemailer = require('../middleware/nodemailer');
 const auth = require('../middleware/auth')
 const { v4: uuid } = require("uuid");
 require("dotenv").config;
@@ -89,19 +89,24 @@ app.post('/forgotpass', auth, async (req, res, next) => {
         var query = `SELECT * FROM people WHERE email='${email}'`;
         var result = await db.query(query);
         console.log("all details", result.rows[0].email);
-        if (result.rows[0].email == 0) {
-            return res.status(401).json("email not registered")
+        if (result.rowCount > 0) {
+            // const payload = {
+            //     email: result.rows[0].email,
+            //     password: result.rows[0].password
+            // }
+            // const token = jwt.sign(payload, process.env.SECRETTOKEN, { expiresIn: '1h' })
+            // console.log("token", token);
+            // // let status = nodemailer.sendMail(token, result.rows[0].email)
+            const Email = result.rows[0].email;
+            console.log(Email);
+             Nodemailer.sendMail(Email)
+            
+             
+            
         } else {
 
-            const payload = {
-                email: result.rows[0].email,
-                password: result.rows[0].password
-            }
-            const token = jwt.sign(payload, process.env.SECRETTOKEN, { expiresIn: '1h' })
-            console.log("token", token);
-            let status = nodemailer.sendMail(token, result.rows[0].email)
-            return status;
-
+           
+            return res.status(401).json("email not registered")
 
         }
 
